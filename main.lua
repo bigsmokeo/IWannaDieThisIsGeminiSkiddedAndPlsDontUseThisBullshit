@@ -42,7 +42,7 @@ TitleBar.BackgroundTransparency = 1
 TitleBar.Parent = MainFrame
 
 local TitleText = Instance.new("TextLabel")
-TitleText.Text = "  Welcome to this shitsploit"
+TitleText.Text = " Welcome to this shitsploit"
 TitleText.Size = UDim2.new(0.7, 0, 1, 0)
 TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleText.TextXAlignment = Enum.TextXAlignment.Left
@@ -72,13 +72,14 @@ CloseBtn.BackgroundTransparency = 1
 CloseBtn.Parent = TitleBar
 
 CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+
 local minimized = false
 MinimizeBtn.MouseButton1Click:Connect(function()
     minimized = not minimized
     MainFrame.Size = minimized and UDim2.new(0, 520, 0, 35) or UDim2.new(0, 520, 0, 340)
 end)
 
--- SIDEBAR (TABS)
+-- SIDEBAR (TABS - CLEAN NO BORDERS)
 local Sidebar = Instance.new("Frame")
 Sidebar.Size = UDim2.new(0, 140, 1, -85)
 Sidebar.Position = UDim2.new(0, 0, 0, 35)
@@ -87,7 +88,7 @@ Sidebar.BorderSizePixel = 0
 Sidebar.Parent = MainFrame
 
 local TabList = Instance.new("UIListLayout")
-TabList.Padding = UDim.new(0, 5)
+TabList.Padding = UDim.new(0, 2)
 TabList.SortOrder = Enum.SortOrder.LayoutOrder
 TabList.Parent = Sidebar
 
@@ -110,7 +111,7 @@ local PFP = Instance.new("ImageLabel")
 PFP.Size = UDim2.new(0, 36, 0, 36)
 PFP.Position = UDim2.new(0, 7, 0.5, -18)
 PFP.BackgroundTransparency = 1
-PFP.Image = game:GetService("Players"):GetUserThumbnailAsync(LP.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+PFP.Image = game:GetService("Players"):GetUserThumbnailAsync(LP.UserId, Enum.ThumbnailType.HeadShot)
 PFP.Parent = ProfileBar
 
 local PFPCorner = Instance.new("UICorner")
@@ -139,27 +140,29 @@ UserLabel.TextXAlignment = Enum.TextXAlignment.Left
 UserLabel.BackgroundTransparency = 1
 UserLabel.Parent = ProfileBar
 
--- SETTINGS CIRCLE BUTTON (Bottom Right - Green)
+-- SETTINGS CIRCLE BUTTON (Bottom Right - Toggles Settings Page)
 local SettingsBtn = Instance.new("TextButton")
 SettingsBtn.Size = UDim2.new(0, 32, 0, 32)
 SettingsBtn.Position = UDim2.new(1, -38, 1, -38)
 SettingsBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
 SettingsBtn.Text = "⚙️"
 SettingsBtn.TextSize = 16
+SettingsBtn.BorderSizePixel = 0
 SettingsBtn.Parent = MainFrame
 
 local SettingsCorner = Instance.new("UICorner")
 SettingsCorner.CornerRadius = UDim.new(1, 0)
 SettingsCorner.Parent = SettingsBtn
 
--- BINDS LIST WINDOW (Floating Left & Toggleable)
+-- BINDS LIST WINDOW (Floating Left)
 local BindsFrame = Instance.new("Frame")
 BindsFrame.Size = UDim2.new(0, 160, 0, 120)
 BindsFrame.Position = UDim2.new(0.5, -430, 0.5, -170)
 BindsFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 BindsFrame.Active = true
 BindsFrame.Draggable = true
-BindsFrame.Visible = true -- Toggleable state
+BindsFrame.Visible = true
+BindsFrame.BorderSizePixel = 0
 BindsFrame.Parent = ScreenGui
 
 local BindsCorner = Instance.new("UICorner")
@@ -184,6 +187,7 @@ local BindsLine = Instance.new("Frame")
 BindsLine.Size = UDim2.new(1, -10, 0, 1)
 BindsLine.Position = UDim2.new(0, 5, 0, 25)
 BindsLine.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
+BindsLine.BorderSizePixel = 0
 BindsLine.Parent = BindsFrame
 
 local BindsContainer = Instance.new("Frame")
@@ -205,22 +209,44 @@ BindItem.TextSize = 11
 BindItem.BackgroundTransparency = 1
 BindItem.Parent = BindsContainer
 
--- TAB SWITCHING SYSTEM
+-- THEME MANAGEMENT & TRACKING
+local currentAccentColor = Color3.fromRGB(0, 255, 150)
+local activeToggles = {}
+local activeTabs = {}
+
+local function UpdateTheme(newColor)
+    currentAccentColor = newColor
+    MainStroke.Color = newColor
+    BindsStroke.Color = newColor
+    BindsLine.BackgroundColor3 = newColor
+    SettingsBtn.BackgroundColor3 = newColor
+    
+    for _, t in pairs(activeTabs) do
+        if t.IsActive then
+            t.Btn.BackgroundColor3 = newColor
+        end
+    end
+    
+    for _, tog in pairs(activeToggles) do
+        if tog.GetState() then
+            tog.Btn.BackgroundColor3 = newColor
+        end
+    end
+end
+
+-- TAB SWITCHING SYSTEM (NO BORDERS)
 local Tabs = {}
 local function CreateTab(name)
     local TabBtn = Instance.new("TextButton")
-    TabBtn.Size = UDim2.new(1, -10, 0, 30)
-    TabBtn.Position = UDim2.new(0, 5, 0, 0)
-    TabBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
-    TabBtn.Text = name
-    TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TabBtn.Size = UDim2.new(1, 0, 0, 32)
+    TabBtn.BackgroundTransparency = 1
+    TabBtn.BorderSizePixel = 0
+    TabBtn.Text = " " .. name
+    TabBtn.TextColor3 = Color3.fromRGB(160, 160, 175)
+    TabBtn.TextXAlignment = Enum.TextXAlignment.Left
     TabBtn.Font = Enum.Font.GothamMedium
     TabBtn.TextSize = 12
     TabBtn.Parent = Sidebar
-
-    local TabCorner = Instance.new("UICorner")
-    TabCorner.CornerRadius = UDim.new(0, 6)
-    TabCorner.Parent = TabBtn
 
     local Page = Instance.new("ScrollingFrame")
     Page.Size = UDim2.new(1, 0, 1, 0)
@@ -233,37 +259,60 @@ local function CreateTab(name)
     PageList.Padding = UDim.new(0, 8)
     PageList.Parent = Page
 
+    local tabObj = {Btn = TabBtn, Page = Page, IsActive = false}
+    table.insert(activeTabs, tabObj)
+
     TabBtn.MouseButton1Click:Connect(function()
-        for _, t in pairs(Tabs) do
+        for _, t in pairs(activeTabs) do
             t.Page.Visible = false
-            t.Btn.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+            t.IsActive = false
+            t.Btn.BackgroundTransparency = 1
+            t.Btn.TextColor3 = Color3.fromRGB(160, 160, 175)
         end
         Page.Visible = true
-        TabBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
+        tabObj.IsActive = true
+        TabBtn.BackgroundTransparency = 0
+        TabBtn.BackgroundColor3 = currentAccentColor
+        TabBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
     end)
 
-    local tabObj = {Btn = TabBtn, Page = Page}
-    table.insert(Tabs, tabObj)
-    if #Tabs == 1 then
+    if #activeTabs == 1 then
         Page.Visible = true
-        TabBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
+        tabObj.IsActive = true
+        TabBtn.BackgroundTransparency = 0
+        TabBtn.BackgroundColor3 = currentAccentColor
+        TabBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
     end
+
     return Page
 end
 
--- TABS CREATION
+-- TABS CREATION (NO SETTINGS TAB IN SIDEBAR)
 local FarmPage = CreateTab("Farming")
 local EggPage = CreateTab("Eggs")
 local SpamPage = CreateTab("Spammer")
 local MiscPage = CreateTab("Misc")
-local SettingsPage = CreateTab("Settings")
+
+-- SETTINGS PAGE (Opens only via Gear Button)
+local SettingsPage = Instance.new("ScrollingFrame")
+SettingsPage.Size = UDim2.new(1, 0, 1, 0)
+SettingsPage.BackgroundTransparency = 1
+SettingsPage.Visible = false
+SettingsPage.ScrollBarThickness = 2
+SettingsPage.Parent = ContentFrame
+
+local SettingsList = Instance.new("UIListLayout")
+SettingsList.Padding = UDim.new(0, 8)
+SettingsList.Parent = SettingsPage
 
 SettingsBtn.MouseButton1Click:Connect(function()
-    for _, t in pairs(Tabs) do
+    for _, t in pairs(activeTabs) do
         t.Page.Visible = false
-        t.Btn.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+        t.IsActive = false
+        t.Btn.BackgroundTransparency = 1
+        t.Btn.TextColor3 = Color3.fromRGB(160, 160, 175)
     end
-    SettingsPage.Visible = true
+    SettingsPage.Visible = not SettingsPage.Visible
 end)
 
 -- UI BUILDERS
@@ -271,8 +320,9 @@ local function AddToggle(parent, text, default, callback)
     local state = default
     local Btn = Instance.new("TextButton")
     Btn.Size = UDim2.new(1, -10, 0, 35)
-    Btn.BackgroundColor3 = state and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(30, 30, 40)
-    Btn.Text = "  " .. text .. ": " .. (state and "ON" or "OFF")
+    Btn.BackgroundColor3 = state and currentAccentColor or Color3.fromRGB(30, 30, 40)
+    Btn.BorderSizePixel = 0
+    Btn.Text = " " .. text .. ": " .. (state and "ON" or "OFF")
     Btn.TextColor3 = state and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
     Btn.TextXAlignment = Enum.TextXAlignment.Left
     Btn.Font = Enum.Font.GothamBold
@@ -283,10 +333,16 @@ local function AddToggle(parent, text, default, callback)
     Corner.CornerRadius = UDim.new(0, 6)
     Corner.Parent = Btn
 
+    local toggleObj = {
+        Btn = Btn,
+        GetState = function() return state end
+    }
+    table.insert(activeToggles, toggleObj)
+
     Btn.MouseButton1Click:Connect(function()
         state = not state
-        Btn.BackgroundColor3 = state and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(30, 30, 40)
-        Btn.Text = "  " .. text .. ": " .. (state and "ON" or "OFF")
+        Btn.BackgroundColor3 = state and currentAccentColor or Color3.fromRGB(30, 30, 40)
+        Btn.Text = " " .. text .. ": " .. (state and "ON" or "OFF")
         Btn.TextColor3 = state and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
         task.spawn(callback, state)
     end)
@@ -296,7 +352,8 @@ local function AddButton(parent, text, callback)
     local Btn = Instance.new("TextButton")
     Btn.Size = UDim2.new(1, -10, 0, 35)
     Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-    Btn.Text = "  " .. text
+    Btn.BorderSizePixel = 0
+    Btn.Text = " " .. text
     Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     Btn.TextXAlignment = Enum.TextXAlignment.Left
     Btn.Font = Enum.Font.GothamBold
@@ -315,7 +372,6 @@ end
 -- ==========================================
 -- HOOK UP FARMING LOGIC
 -- ==========================================
-
 AddToggle(FarmPage, "Win Flooder", false, function(state)
     getgenv().WinLoop = state
     if state then
@@ -395,7 +451,6 @@ end)
 -- ==========================================
 -- MISC TAB FEATURES
 -- ==========================================
-
 AddToggle(MiscPage, "WalkSpeed Boost (50)", false, function(state)
     local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
     if hum then
@@ -427,9 +482,8 @@ AddButton(MiscPage, "Rejoin Server", function()
 end)
 
 -- ==========================================
--- SETTINGS & ANONYMOUS MODE
+-- SETTINGS PANEL
 -- ==========================================
-
 AddToggle(SettingsPage, "Show Binds List Overlay", true, function(state)
     BindsFrame.Visible = state
 end)
@@ -442,39 +496,22 @@ AddToggle(SettingsPage, "Anonymous / Streamer Mode", false, function(state)
     else
         DispNameLabel.Text = LP.DisplayName
         UserLabel.Text = "@" .. LP.Name
-        PFP.Image = game:GetService("Players"):GetUserThumbnailAsync(LP.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+        PFP.Image = game:GetService("Players"):GetUserThumbnailAsync(LP.UserId, Enum.ThumbnailType.HeadShot)
     end
 end)
 
--- Color Customization Button
-local ColorBtn = Instance.new("TextButton")
-ColorBtn.Size = UDim2.new(1, -10, 0, 35)
-ColorBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-ColorBtn.Text = "  Change Theme Color (Pink/Green/Cyan)"
-ColorBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ColorBtn.TextXAlignment = Enum.TextXAlignment.Left
-ColorBtn.Font = Enum.Font.GothamBold
-ColorBtn.TextSize = 12
-ColorBtn.Parent = SettingsPage
-
-local ColorCorner = Instance.new("UICorner")
-ColorCorner.CornerRadius = UDim.new(0, 6)
-ColorCorner.Parent = ColorBtn
-
-local colors = {
-    Color3.fromRGB(0, 255, 150), -- Green
-    Color3.fromRGB(255, 0, 150), -- Pink
-    Color3.fromRGB(0, 200, 255)  -- Cyan
+local palette = {
+    Color3.fromRGB(0, 255, 150), -- Neon Green
+    Color3.fromRGB(255, 0, 150), -- Neon Pink
+    Color3.fromRGB(0, 200, 255), -- Electric Cyan
+    Color3.fromRGB(255, 170, 0), -- Amber Gold
+    Color3.fromRGB(180, 0, 255)  -- Purple
 }
-local colorIdx = 1
+local paletteIdx = 1
 
-ColorBtn.MouseButton1Click:Connect(function()
-    colorIdx = (colorIdx % #colors) + 1
-    local newColor = colors[colorIdx]
-    MainStroke.Color = newColor
-    BindsStroke.Color = newColor
-    BindsLine.BackgroundColor3 = newColor
-    SettingsBtn.BackgroundColor3 = newColor
+AddButton(SettingsPage, "Cycle Full UI Color Theme", function()
+    paletteIdx = (paletteIdx % #palette) + 1
+    UpdateTheme(palette[paletteIdx])
 end)
 
 -- Keybind listener
@@ -482,7 +519,7 @@ game:GetService("UserInputService").InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == getgenv().SpamKeybind then
         getgenv().HellaClick = not getgenv().HellaClick
-        BindItem.Text = "Spammer - [ " .. getgenv().SpamKeybind.Name .. " ] " .. (getgenv().HellaClick and "(ACTIVE)" or "")
+        BindItem.Text = "Spammer - [ " .. getgenv().SpamKeybind.Name .. " ] " .. (getgenv().HellaClick and "ON" or "OFF")
         if getgenv().HellaClick then startSpammer() end
     end
 end)
